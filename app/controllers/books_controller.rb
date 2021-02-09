@@ -1,15 +1,20 @@
 class BooksController < ApplicationController
     before_action :set_book, only: [:show, :edit, :update, :destroy]
+    before_action :redirect_to_signin
+    
     
     def index
-        @books = Book.all
+        #@books = Book.all
         #p "-----------------------"
         #b = @books
         #p b
         #p "------------------------"
         #@books = Book.where(inout: 1).order(:amount)
+        @books = Book.where(user_id: session[:user_id])
         @books = @books.where(year: params[:year]) if params[:year].present?
         @books = @books.where(month: params[:month]) if params[:month].present?
+        @books = @books.where(inout: params[:inout]) if params[:inout].present?
+
         
     end
     
@@ -31,6 +36,7 @@ class BooksController < ApplicationController
         #p book_params
         #p params
         #p "------------------------------"
+        book_params[:user_id] = session[:user_id]
         @book = Book.new(book_params)
          a = @book.year 
          b = @book.month 
@@ -73,12 +79,16 @@ class BooksController < ApplicationController
     private
     
     def set_book
-        @book = Book.find(params[:id])
+        #@book = Book.find(params[:id])
+        @book = Book.where(user_id: session[:user_id]).find(params[:id])
     end
 
     def book_params
-        book_params = params.require(:book).permit(:year, :month, :inout, :category, :amount)
+        params.require(:book).permit(:year, :month, :inout, :category, :amount)
     end
     
+    #def redirect_to_signin
+        #redirect_to signin_path if session[:user_id].blank?
+    #end
     
 end
